@@ -11,8 +11,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.xml.bind.SchemaOutputResolver;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Created by hdy on 17-8-21.
@@ -21,6 +23,7 @@ public class Test {
     @org.junit.Test
     public void test3() {
         MovieSearch search = MovieUtils.search("异形");
+        search = search.nextPage();
         System.out.println(search);
     }
 

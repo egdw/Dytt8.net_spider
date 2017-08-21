@@ -23,12 +23,11 @@ public class MovieUtils {
         ArrayList<MovieSearchDetail> details = new ArrayList<MovieSearchDetail>();
         Document document = null;
         try {
-            String searchUrl = "/plus/search.php?keyword=" + URLEncoder.encode(movieSearch.getSearchName(), "gb2312") + "&amp;searchtype=titlekeyword&amp;channeltype=0&amp;orderby=&amp;kwtype=0&amp;pagesize=10&amp;typeid=0&amp;TotalResult=40&amp;PageNo=" + movieSearch.getPage();
+            String searchUrl = "http://s.dydytt.net/plus/search.php?keyword=" + URLEncoder.encode(movieSearch.getSearchName(), "gb2312") + "&searchtype=titlekeyword&channeltype=0&orderby=&kwtype=0&pagesize=10&typeid=0&TotalResult=40&PageNo=" + movieSearch.getPage();
             document = Jsoup.parse(NetworkUtils.get(searchUrl));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-//        String content = NetworkUtils.read("/home/hdy/Desktop/index2.html");
         Elements elements = document.select("div.co_content8 > ul > table[width] > tbody");
         for (int i = 0; i < elements.size(); i++) {
             Element element = elements.get(i);
@@ -52,7 +51,7 @@ public class MovieUtils {
             }
         }
         MovieSearch search = new MovieSearch(movieSearch.getPage(), movieSearch.getPageCount(), movieSearch.getSearchName(), details);
-        return null;
+        return search;
     }
 
     /**
@@ -79,12 +78,9 @@ public class MovieUtils {
                 Element tr2 = trs.get(1);
                 //第一个获取标题和地址
                 String href = tr1.select("td[width$=55%] > b > a").get(0).attr("href");
-                System.out.println(href);
                 String title = tr1.select("td[width$=55%] > b > a").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                System.out.println(title);
                 //第二个获取描述
                 String description = tr2.getElementsByTag("td").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                System.out.println(description);
                 MovieSearchDetail detail = new MovieSearchDetail(title, href, description);
                 details.add(detail);
             } else {

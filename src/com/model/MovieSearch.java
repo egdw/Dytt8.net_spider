@@ -29,6 +29,24 @@ public class MovieSearch {
         return search;
     }
 
+    public MovieSearch nextPage() {
+        this.page++;
+        if (page > pageCount) {
+            return null;
+        }
+        MovieSearch search = MovieUtils.MovieSearchReword(this);
+        return search;
+    }
+
+    public MovieSearch formerPage() {
+        this.page--;
+        if (page < 0) {
+            page = 0;
+        }
+        MovieSearch search = MovieUtils.MovieSearchReword(this);
+        return search;
+    }
+
     /**
      * 页面跳转
      */
