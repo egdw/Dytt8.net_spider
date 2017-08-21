@@ -1,11 +1,9 @@
 package com.test;
 
-import com.model.Movie;
-import com.model.MovieSearch;
-import com.model.MovieTop;
-import com.model.MovieType;
+import com.model.*;
 import com.utils.MovieUtils;
 import com.utils.NetworkUtils;
+import com.utils.ParseUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,11 +18,66 @@ import java.util.Map;
  * Created by hdy on 17-8-21.
  */
 public class Test {
+
+    @org.junit.Test
+    public void testOne() {
+        Object[] detail = MovieUtils.getTypeDetail("旧版综艺", "http://dytt8.net/html/2009zongyi/index.html");
+        MovieSearch o = (MovieSearch) detail[2];
+        System.out.println(o);
+        MovieSearch movieSearch = o.nextPage();
+        System.out.println(movieSearch);
+    }
+
     @org.junit.Test
     public void test3() {
-        MovieSearch search = MovieUtils.search("异形");
-        search = search.nextPage();
+        MovieSearch search = MovieUtils.search("神奇");
         System.out.println(search);
+        MovieSearch movieSearch = search.nextPage();
+        System.out.println(movieSearch);
+    }
+
+    @org.junit.Test
+    public void test5() {
+        Map<String, String> map = ParseUtils.getType();
+        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> next = iterator.next();
+            System.out.println(next.getKey() + " " + next.getValue());
+        }
+    }
+
+    @org.junit.Test
+    public void testTyoe() {
+        Map<String, String> map = ParseUtils.getType();
+        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> next = iterator.next();
+            System.out.println("当前查询:" + next.getKey() + " " + next.getValue());
+            Object[] detail = MovieUtils.getTypeDetail(next.getKey(), next.getValue());
+            if (detail == null) {
+                System.out.println("当前分类不能查询");
+            } else {
+                if (detail[0] != null) {
+                    System.out.println(detail[0]);
+                } else if (detail[1] != null) {
+                    System.out.println(detail[1]);
+                }
+                System.out.println(detail[2]);
+            }
+        }
+    }
+
+    @org.junit.Test
+    public void testDetail() {
+        MovieDetail detail = MovieUtils.detail("http://dytt8.net/html/gndy/dyzz/20170820/54792.html");
+        System.out.println(detail);
+
+    }
+
+    @org.junit.Test
+    public void test4() {
+        Map<String, String> type = ParseUtils.getType();
+
     }
 
 

@@ -9,49 +9,136 @@ import org.jsoup.select.Elements;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * Created by hdy on 17-8-21.
+ * 主要的工具类
+ * <p>
+ * 里面实现了各种数据的解析和封装
  */
 public class MovieUtils {
+
+
+    /**
+     * 返回相应类型检索的详细数据
+     * <p>
+     * 由于有几种形式的界面
+     * <p>
+     * 所以返回object数组
+     * <p>
+     * object[0] 不为null的时候就是经典影片了 主页布局
+     * <p>
+     * object[1] 不为null的时候就是高分经典了 详细文章布局
+     * <p>
+     * object[2] 不为null的时候就是其他的频道了 搜索界面布局
+     * <p>
+     * 这样就可以区分是哪个类和布局了
+     * 当然也可以使用instanceof...
+     *
+     * @param url
+     * @return
+     */
+    public static Object[] getTypeDetail(String title, String url) {
+        Object[] obj = new Object[3];
+        String content = NetworkUtils.get(url);
+        if (content == null) {
+            return null;
+        }
+        Document document = null;
+        if ("经典影片".equals(title)) {
+            document = Jsoup.parse(content);
+            Movie movie = ParseUtils.parseIndex(document);
+            obj[0] = movie;
+            //这个网站是首页界面的
+        } else if ("高分经典".equals(title)) {
+            document = Jsoup.parse(content);
+            MovieDetail detail = ParseUtils.parseDetail(document);
+            obj[1] = detail;
+            //这个详细页面界面的
+        } else if ("加入收藏".equals(title) || "收藏本站".equals(title) || "设为主页".equals(title)) {
+            return null;
+            //这个不执行
+        } else {
+            document = Jsoup.parse(content);
+            //其他都是搜索界面的
+            ArrayList<MovieSearchDetail> details = ParseUtils.parseTypeSearch(document);
+            if (details == null || details.size() == 0) {
+                return null;
+            }
+            //获取页码和页数
+            Element elements2 = null;
+            if (document.select("div.x").size() >= 2) {
+                elements2 = document.select("div.x").get(1);
+            } else {
+                return null;
+            }
+            //说明获取正确了
+            String attr = elements2.select("a").get(elements2.getElementsByTag("a").size() - 1).attr("href");
+            //获取到最后一个页码
+            Integer pageNum = Integer.valueOf(attr.substring(attr.lastIndexOf("_") + 1, attr.lastIndexOf(".")));
+            //获取当前分页的前缀
+//            String preffix = url.substring(0, url.lastIndexOf("/") + 1) + attr.substring(0, attr.lastIndexOf("_") + 1);
+            String preffix = attr.substring(0, attr.lastIndexOf("_") + 1);
+            MovieSearch search = new MovieSearch(1, pageNum, title, details);
+            search.setPreffix(preffix);
+            search.setType(MovieSearch.TYPE_SEARCH);
+            obj[2] = search;
+        }
+        return obj;
+    }
+
+
+    /**
+     * 获取详细的单页影片数据
+     *
+     * @param url 网页地址
+     */
+    public static MovieDetail detail(String url) {
+        String content = NetworkUtils.get(url);
+        if (content == null) {
+            return null;
+        }
+        Document document = Jsoup.parse(content);
+        return ParseUtils.parseDetail(document);
+    }
+
+    /**
+     * 用于分类的跳转
+     *
+     * @return
+     */
+    public static MovieSearch movieTypeSearchFoward(MovieSearch movieSearch) {
+        String searchUrl = movieSearch.getPreffix() + movieSearch.getPage() + movieSearch.getFormat();
+        System.out.println(searchUrl);
+        String content = NetworkUtils.get(searchUrl);
+        if (content == null) {
+            return null;
+        }
+        Document document = Jsoup.parse(content);
+        ArrayList<MovieSearchDetail> details = ParseUtils.parseTypeSearch(document);
+        movieSearch.setDetails(details);
+        return movieSearch;
+    }
+
 
     /**
      * 用于搜索的跳转
      */
-    public static MovieSearch MovieSearchReword(MovieSearch movieSearch) {
-        ArrayList<MovieSearchDetail> details = new ArrayList<MovieSearchDetail>();
+    public static MovieSearch MovieSearchForward(MovieSearch movieSearch) {
         Document document = null;
         try {
             String searchUrl = "http://s.dydytt.net/plus/search.php?keyword=" + URLEncoder.encode(movieSearch.getSearchName(), "gb2312") + "&searchtype=titlekeyword&channeltype=0&orderby=&kwtype=0&pagesize=10&typeid=0&TotalResult=40&PageNo=" + movieSearch.getPage();
-            document = Jsoup.parse(NetworkUtils.get(searchUrl));
+            String content = NetworkUtils.get(searchUrl);
+            if (content == null) {
+                return null;
+            }
+            document = Jsoup.parse(content);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Elements elements = document.select("div.co_content8 > ul > table[width] > tbody");
-        for (int i = 0; i < elements.size(); i++) {
-            Element element = elements.get(i);
-            Elements trs = element.getElementsByTag("tr");
-            if (trs.size() == 3) {
-                //等于三个才是正常
-                Element tr1 = trs.get(0);
-                Element tr2 = trs.get(1);
-                //第一个获取标题和地址
-                String href = tr1.select("td[width$=55%] > b > a").get(0).attr("href");
-                System.out.println(href);
-                String title = tr1.select("td[width$=55%] > b > a").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                System.out.println(title);
-                //第二个获取描述
-                String description = tr2.getElementsByTag("td").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                System.out.println(description);
-                MovieSearchDetail detail = new MovieSearchDetail(title, href, description);
-                details.add(detail);
-            } else {
-                continue;
-            }
-        }
-        MovieSearch search = new MovieSearch(movieSearch.getPage(), movieSearch.getPageCount(), movieSearch.getSearchName(), details);
-        return search;
+        ArrayList<MovieSearchDetail> details = ParseUtils.parseSearch(document);
+        movieSearch.setDetails(details);
+        return movieSearch;
     }
 
     /**
@@ -65,28 +152,11 @@ public class MovieUtils {
             e.printStackTrace();
         }
         String content = NetworkUtils.get(searchUrl);
-        ArrayList<MovieSearchDetail> details = new ArrayList<MovieSearchDetail>();
-//        String content = NetworkUtils.read("/home/hdy/Desktop/index2.html");
-        Document document = Jsoup.parse(content);
-        Elements elements = document.select("div.co_content8 > ul > table[width] > tbody");
-        for (int i = 0; i < elements.size(); i++) {
-            Element element = elements.get(i);
-            Elements trs = element.getElementsByTag("tr");
-            if (trs.size() == 3) {
-                //等于三个才是正常
-                Element tr1 = trs.get(0);
-                Element tr2 = trs.get(1);
-                //第一个获取标题和地址
-                String href = tr1.select("td[width$=55%] > b > a").get(0).attr("href");
-                String title = tr1.select("td[width$=55%] > b > a").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                //第二个获取描述
-                String description = tr2.getElementsByTag("td").get(0).text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
-                MovieSearchDetail detail = new MovieSearchDetail(title, href, description);
-                details.add(detail);
-            } else {
-                continue;
-            }
+        if (content == null) {
+            return null;
         }
+        Document document = Jsoup.parse(content);
+        ArrayList<MovieSearchDetail> details = ParseUtils.parseSearch(document);
 
         //获取页码和页数
         Elements elements2 = document.select("div.co_content8 > ul > table[cellpadding] > tbody");
@@ -111,27 +181,13 @@ public class MovieUtils {
      * @return
      */
     public static Movie getIndexLasted() {
-        Movie movie = null;
         String content = NetworkUtils.get("http://www.dytt8.net/");
-//        String content = NetworkUtils.read("/home/hdy/Desktop/index.html");
+        if (content == null) {
+            return null;
+        }
         Document document = Jsoup.parse(content);
         //获取推荐的ul
-        Elements elements = document.select("div.co_area2 > div.co_content2 > ul");
-        movie = new Movie();
-        Element element = elements.get(0);
-        String type_title = element.parent().parent().select("div.title_all > p").text();
-        MovieType type = new MovieType(null, type_title);
-        Elements as = element.getElementsByTag("a");
-        ArrayList<MovieTop> movieTops = new ArrayList<MovieTop>();
-        for (int j = 0; j < as.size(); j++) {
-            Element a = as.get(j);
-            String href = a.attr("href");
-            String title = a.text();
-            MovieTop top = new MovieTop(href, title, null);
-            movieTops.add(top);
-        }
-        movie.getMap().put(type, movieTops);
-        return movie;
+        return ParseUtils.parseIndexLasted(document);
     }
 
 
@@ -141,7 +197,9 @@ public class MovieUtils {
     public static Movie getIndexOthers() {
         Movie movie = null;
         String content = NetworkUtils.get("http://www.dytt8.net/");
-//        String content = NetworkUtils.read("/home/hdy/Desktop/index.html");
+        if (content == null) {
+            return null;
+        }
         Document document = Jsoup.parse(content);
         //获取推荐的ul
         Elements elements = document.select("div.co_area2 > div.co_content4 > ul");
@@ -171,56 +229,11 @@ public class MovieUtils {
      * @return
      */
     public static Movie getIndexTypeAndInfo() {
-        Movie movie = null;
-        {
-            String content = NetworkUtils.get("http://www.dytt8.net/");
-//            String content = NetworkUtils.read("/home/hdy/Desktop/index.html");
-            Document document = Jsoup.parse(content);
-            Elements elements = document.select("table > tbody > tr");
-            //临时存放视频类型
-            LinkedList<MovieType> movieTypes = new LinkedList<MovieType>();
-            ArrayList<MovieTop> movieTops = new ArrayList<MovieTop>();
-            movie = new Movie();
-            int times = 0;
-            for (Element link : elements) {
-                times++;
-                Elements select = link.select("td.inddline");
-                if (select.size() == 2) {
-                    //电影相关信息
-                    Elements a = select.get(0).getElementsByTag("a");
-                    //类型指向地址
-                    String type_href = a.get(0).attr("href");
-                    //类型内容
-                    String type_content = a.get(0).text();
-                    //资源指向地址
-                    String movie_href = a.get(1).attr("href");
-                    //资源标题
-                    String movie_title = a.get(1).text();
-                    //时间
-                    String time = select.get(1).getElementsByTag("font").get(0).text();
-                    if (movieTypes.size() == 0) {
-                        MovieType movieType = new MovieType(type_href, type_content);
-                        movieTypes.add(movieType);
-                    } else {
-                        MovieType last = movieTypes.getLast();
-                        if (type_content.equals(last.getTitle())) {
-                            //说明是一样的
-                            movieTops.add(new MovieTop(movie_href, movie_title, time));
-                            if (times == elements.size() - 1) {
-                                //如果一样,说明是最后了
-                                movie.getMap().put(movieTypes.getLast(), movieTops);
-                            }
-                        } else {
-                            //说明是不一样的
-                            movie.getMap().put(movieTypes.getLast(), movieTops);
-                            movieTops = new ArrayList<MovieTop>();
-                            MovieType movieType = new MovieType(type_href, type_content);
-                            movieTypes.add(movieType);
-                        }
-                    }
-                }
-            }
+        String content = NetworkUtils.get("http://www.dytt8.net/");
+        if (content == null) {
+            return null;
         }
-        return movie;
+        Document document = Jsoup.parse(content);
+        return ParseUtils.parseIndex(document);
     }
 }

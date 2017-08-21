@@ -2,6 +2,7 @@ package com.model;
 
 /**
  * Created by hdy on 17-8-21.
+ * 用于存放电影类型
  */
 public class MovieType {
     //类型

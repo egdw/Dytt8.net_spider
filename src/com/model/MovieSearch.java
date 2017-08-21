@@ -6,8 +6,19 @@ import java.util.ArrayList;
 
 /**
  * Created by hdy on 17-8-21.
+ * 用于存放搜索或分类结果
  */
 public class MovieSearch {
+    //判断是普通搜索还是分类搜索
+    //0 普通搜索 1 分类搜索
+    private int type = 0;
+    //分类分页前缀
+    private String preffix;
+    //分类分页后缀
+    private String format = ".html";
+    public static final Integer TYPE_SEARCH = 1;
+    public static final Integer NORMAL_SEARCH = 0;
+
     private int page;
     private int pageCount;
     private String searchName;
@@ -25,8 +36,11 @@ public class MovieSearch {
      */
     public MovieSearch toFirst() {
         page = 0;
-        MovieSearch search = MovieUtils.MovieSearchReword(this);
-        return search;
+        if (type == NORMAL_SEARCH) {
+            return MovieUtils.MovieSearchForward(this);
+
+        }
+        return MovieUtils.movieTypeSearchFoward(this);
     }
 
     public MovieSearch nextPage() {
@@ -34,8 +48,10 @@ public class MovieSearch {
         if (page > pageCount) {
             return null;
         }
-        MovieSearch search = MovieUtils.MovieSearchReword(this);
-        return search;
+        if (type == NORMAL_SEARCH) {
+            return MovieUtils.MovieSearchForward(this);
+        }
+        return MovieUtils.movieTypeSearchFoward(this);
     }
 
     public MovieSearch formerPage() {
@@ -43,8 +59,10 @@ public class MovieSearch {
         if (page < 0) {
             page = 0;
         }
-        MovieSearch search = MovieUtils.MovieSearchReword(this);
-        return search;
+        if (type == NORMAL_SEARCH) {
+            return MovieUtils.MovieSearchForward(this);
+        }
+        return MovieUtils.movieTypeSearchFoward(this);
     }
 
     /**
@@ -55,8 +73,10 @@ public class MovieSearch {
             return null;
         }
         this.page = page;
-        MovieSearch search = MovieUtils.MovieSearchReword(this);
-        return search;
+        if (type == NORMAL_SEARCH) {
+            return MovieUtils.MovieSearchForward(this);
+        }
+        return MovieUtils.movieTypeSearchFoward(this);
     }
 
     /**
@@ -64,8 +84,10 @@ public class MovieSearch {
      */
     public MovieSearch toEnd() {
         page = pageCount;
-        MovieSearch search = MovieUtils.MovieSearchReword(this);
-        return search;
+        if (type == NORMAL_SEARCH) {
+            return MovieUtils.MovieSearchForward(this);
+        }
+        return MovieUtils.movieTypeSearchFoward(this);
     }
 
     public int getPage() {
@@ -100,10 +122,38 @@ public class MovieSearch {
         this.details = details;
     }
 
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public void setPreffix(String preffix) {
+        this.preffix = preffix;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+
+    public int getType() {
+        return type;
+    }
+
+    public String getPreffix() {
+        return preffix;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
     @Override
     public String toString() {
         return "MovieSearch{" +
-                "page=" + page +
+                "type=" + type +
+                ", preffix='" + preffix + '\'' +
+                ", format='" + format + '\'' +
+                ", page=" + page +
                 ", pageCount=" + pageCount +
                 ", searchName='" + searchName + '\'' +
                 ", details=" + details +
