@@ -31,15 +31,15 @@ public class Test {
         System.out.println(movieSearch);
     }
 
+
+
     /**
      * 搜索测试
      */
     @org.junit.Test
     public void test3() {
-        MovieSearch search = MovieUtils.search("神奇");
+        MovieSearch search = MovieUtils.search("52赫");
         System.out.println(search);
-        MovieSearch movieSearch = search.nextPage();
-        System.out.println(movieSearch);
     }
 
 
@@ -87,7 +87,7 @@ public class Test {
      */
     @org.junit.Test
     public void testDetail() {
-        MovieDetail detail = MovieUtils.detail("http://dytt8.net/html/gndy/dyzz/20170820/54792.html");
+        MovieDetail detail = MovieUtils.detail("/html/gndy/dyzz/20170802/54643.html");
         System.out.println(detail);
 
     }

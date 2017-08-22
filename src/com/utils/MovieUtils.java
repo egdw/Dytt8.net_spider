@@ -96,6 +96,10 @@ public class MovieUtils {
      * @param url 网页地址
      */
     public static MovieDetail detail(String url) {
+        if (!url.contains("http")) {
+            url = "http://www.ygdy8.com/" + url;
+        }
+
         String content = NetworkUtils.get(url);
         if (content == null) {
             return null;
@@ -175,10 +179,10 @@ public class MovieUtils {
             MovieSearch search = new MovieSearch(1, pageNum, name, details);
             return search;
         } else {
-            //说明是搜索不到
+            //说明是没有页码
             MovieSearch search = new MovieSearch(1, 0, name, details);
+            return search;
         }
-        return null;
     }
 
 
