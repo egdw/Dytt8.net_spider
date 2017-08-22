@@ -77,10 +77,12 @@ public class MovieUtils {
             //获取到最后一个页码
             Integer pageNum = Integer.valueOf(attr.substring(attr.lastIndexOf("_") + 1, attr.lastIndexOf(".")));
             //获取当前分页的前缀
-//            String preffix = url.substring(0, url.lastIndexOf("/") + 1) + attr.substring(0, attr.lastIndexOf("_") + 1);
+            String host = url.substring(0, url.lastIndexOf("/") + 1);
+            System.out.println(host);
             String preffix = attr.substring(0, attr.lastIndexOf("_") + 1);
             MovieSearch search = new MovieSearch(1, pageNum, title, details);
             search.setPreffix(preffix);
+            search.setHost(host);
             search.setType(MovieSearch.TYPE_SEARCH);
             obj[2] = search;
         }
@@ -108,7 +110,12 @@ public class MovieUtils {
      * @return
      */
     public static MovieSearch movieTypeSearchFoward(MovieSearch movieSearch) {
-        String searchUrl = movieSearch.getPreffix() + movieSearch.getPage() + movieSearch.getFormat();
+        String searchUrl = null;
+        if (movieSearch.getPreffix().contains("http")) {
+            searchUrl = movieSearch.getPreffix() + movieSearch.getPage() + movieSearch.getFormat();
+        } else {
+            searchUrl = movieSearch.getHost() + movieSearch.getPreffix() + movieSearch.getPage() + movieSearch.getFormat();
+        }
         System.out.println(searchUrl);
         String content = NetworkUtils.get(searchUrl);
         if (content == null) {

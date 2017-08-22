@@ -16,6 +16,8 @@ public class MovieSearch {
     private String preffix;
     //分类分页后缀
     private String format = ".html";
+    //主机名称
+    private String host;
     public static final Integer TYPE_SEARCH = 1;
     public static final Integer NORMAL_SEARCH = 0;
 
@@ -134,6 +136,21 @@ public class MovieSearch {
         this.format = format;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public static Integer getTypeSearch() {
+        return TYPE_SEARCH;
+    }
+
+    public static Integer getNormalSearch() {
+        return NORMAL_SEARCH;
+    }
 
     public int getType() {
         return type;

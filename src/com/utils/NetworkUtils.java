@@ -11,6 +11,7 @@ import java.io.*;
 
 /**
  * Created by hdy on 17-8-21.
+ * 网络请求类
  */
 public class NetworkUtils {
     //设置重新连接次数三次
@@ -67,34 +68,6 @@ public class NetworkUtils {
                     flag = false;
                     return null;
                 }
-            }
-        }
-        return null;
-    }
-
-
-    public static java.lang.String read(java.lang.String path) {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
-            char[] chars = new char[1024];
-            int len = -1;
-            StringBuilder sb = new StringBuilder();
-            while ((len = reader.read(chars)) != -1) {
-                sb.append(new String(chars, 0, len));
-            }
-            return sb.toString();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
         return null;

@@ -19,6 +19,9 @@ import java.util.Map;
  */
 public class Test {
 
+    /**
+     * 单个分类查询
+     */
     @org.junit.Test
     public void testOne() {
         Object[] detail = MovieUtils.getTypeDetail("旧版综艺", "http://dytt8.net/html/2009zongyi/index.html");
@@ -28,6 +31,9 @@ public class Test {
         System.out.println(movieSearch);
     }
 
+    /**
+     * 搜索测试
+     */
     @org.junit.Test
     public void test3() {
         MovieSearch search = MovieUtils.search("神奇");
@@ -36,6 +42,10 @@ public class Test {
         System.out.println(movieSearch);
     }
 
+
+    /**
+     * 获取分类测试
+     */
     @org.junit.Test
     public void test5() {
         Map<String, String> map = ParseUtils.getType();
@@ -46,6 +56,11 @@ public class Test {
         }
     }
 
+    /**
+     * 所有分类查询测试
+     * 尽量不要使用遍历....
+     * 它服务器不行.....
+     */
     @org.junit.Test
     public void testTyoe() {
         Map<String, String> map = ParseUtils.getType();
@@ -67,6 +82,9 @@ public class Test {
         }
     }
 
+    /**
+     * 详细数据获取
+     */
     @org.junit.Test
     public void testDetail() {
         MovieDetail detail = MovieUtils.detail("http://dytt8.net/html/gndy/dyzz/20170820/54792.html");
@@ -74,13 +92,10 @@ public class Test {
 
     }
 
-    @org.junit.Test
-    public void test4() {
-        Map<String, String> type = ParseUtils.getType();
 
-    }
-
-
+    /**
+     * 主页数据获取
+     */
     @org.junit.Test
     public void test1() {
         Movie info = MovieUtils.getIndexTypeAndInfo();
@@ -97,10 +112,11 @@ public class Test {
         }
     }
 
+    /**
+     * 最新发布170部影片
+     */
     @org.junit.Test
     public void test2() {
-//        Scanner scanner = new Scanner(System.in);
-//        int i = scanner.nextInt();
         int i = 2;
         if (i == 0) {
             Movie movie = MovieUtils.getIndexTypeAndInfo();
@@ -128,10 +144,13 @@ public class Test {
         }
     }
 
+
+    /**
+     * 主页大分类获取
+     */
     @org.junit.Test
     public void jsoupTest() {
-//        String content = NetworkUtils.get("http://www.dytt8.net/");
-        String content = NetworkUtils.read("/home/hdy/Desktop/index.html");
+        String content = NetworkUtils.get("http://www.dytt8.net/");
         Document document = Jsoup.parse(content);
         Elements elements = document.select("table > tbody > tr");
         System.out.println(elements.size());
@@ -157,30 +176,26 @@ public class Test {
                 //时间
                 String time = select.get(1).getElementsByTag("font").get(0).text();
                 if (movieTypes.size() == 0) {
-                    System.out.println("第一次执行");
                     MovieType movieType = new MovieType(type_href, type_content);
                     movieTypes.add(movieType);
                 } else {
                     MovieType last = movieTypes.getLast();
                     if (type_content.equals(last.getTitle())) {
                         //说明是一样的
-                        System.out.println("一样");
                         movieTops.add(new MovieTop(movie_href, movie_title, time));
                         if (times == elements.size() - 1) {
                             //如果一样,说明是最后了
-                            System.out.println("最后一个了");
                             movie.getMap().put(movieTypes.getLast(), movieTops);
                         }
                     } else {
                         //说明是不一样的
-                        System.out.println("频道切换");
                         movie.getMap().put(movieTypes.getLast(), movieTops);
                         movieTops = new ArrayList<MovieTop>();
                         MovieType movieType = new MovieType(type_href, type_content);
                         movieTypes.add(movieType);
                     }
                 }
-                System.out.println(type_content);
+                System.out.println(movieTypes);
             }
         }
     }
