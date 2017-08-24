@@ -96,13 +96,20 @@ public class MovieUtils {
      * @param url 网页地址
      */
     public static MovieDetail detail(String url) {
+        String temp = url;
         if (!url.contains("http")) {
             url = "http://www.ygdy8.com/" + url;
         }
 
         String content = NetworkUtils.get(url);
-        if (content == null) {
-            return null;
+        if (content == null || content.contains("您的访问出错了")) {
+            //处理对于部分的页面域名不一样= =
+            //我也很无奈.这网站做的乱七八糟的....
+            url = "http://dytt8.net/" + temp;
+            content = NetworkUtils.get(url);
+            if (content == null) {
+                return null;
+            }
         }
         Document document = Jsoup.parse(content);
         return ParseUtils.parseDetail(document);
@@ -120,7 +127,6 @@ public class MovieUtils {
         } else {
             searchUrl = movieSearch.getHost() + movieSearch.getPreffix() + movieSearch.getPage() + movieSearch.getFormat();
         }
-        System.out.println(searchUrl);
         String content = NetworkUtils.get(searchUrl);
         if (content == null) {
             return null;

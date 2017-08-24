@@ -177,9 +177,18 @@ public class ParseUtils {
                 Element tr1 = trs.get(1);
                 Element tr2 = trs.get(3);
                 //第一个获取标题和地址
-                String href = tr1.select("td[height$=26] > b > a").get(0).attr("href");
                 String title = "";
                 Elements as = tr1.select("td[height$=26] > b > a");
+
+                String href = "";
+                if (as.size() >= 2) {
+                    href = as.get(1).attr("href");
+                    //说明链接地址在第二行
+                } else {
+                    //链接地址在第一行
+                    href = as.get(0).attr("href");
+                }
+
                 for (int j = 0; j < as.size(); j++) {
                     Element element1 = as.get(j);
                     title = title + element1.text().replaceAll("<font color=\"red\">", "").replaceAll("</font>", "");
