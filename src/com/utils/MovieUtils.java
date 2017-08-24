@@ -107,6 +107,11 @@ public class MovieUtils {
             //我也很无奈.这网站做的乱七八糟的....
             url = "http://dytt8.net/" + temp;
             content = NetworkUtils.get(url);
+            //这乐色网站.三个域名换着玩= = 我很无奈.只能这样解决了
+            if (content == null || content.contains("您的访问出错了")) {
+                url = "http://www.ygdy8.net/" + temp;
+                content = NetworkUtils.get(url);
+            }
             if (content == null) {
                 return null;
             }
